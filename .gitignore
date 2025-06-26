@@ -39,3 +39,6 @@ terraform.rc
 # Ignore direnv files
 .envrc
 .envrc.local
+
+# Ignore AWS profile cache
+.aws-profile-cache
