@@ -1,0 +1,25 @@
+PROFILE_CACHE_FILE=".aws-profile-cache"
+
+if [[ -f "$PROFILE_CACHE_FILE" ]] && [[ $(find "$PROFILE_CACHE_FILE" -mmin -60) ]]; then
+    # Use cached profile if less than 60 minutes old
+    export AWS_PROFILE=$(cat "$PROFILE_CACHE_FILE")
+    echo "Using cached AWS profile: $AWS_PROFILE"
+else
+    echo "Select AWS profile:"
+    profiles=("aca-dev" "aca-prod" "aca-devops")
+    select profile in "${profiles[@]}"; do
+        if [[ -n "$profile" ]]; then
+            export AWS_PROFILE="$profile"
+            echo "$profile" > "$PROFILE_CACHE_FILE"
+            echo "Selected and cached profile: $profile"
+            break
+        fi
+    done
+fi
+
+export AWS_REGION=us-east-2
+
+# Check session validity and login if needed
+if ! aws sts get-caller-identity >/dev/null 2>&1; then
+    echo "⚠️ AWS session invalid - run 'aws sso login' manually"
+fi
